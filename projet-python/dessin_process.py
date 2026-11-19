@@ -64,22 +64,9 @@ def paint_disk(bitmap, x, y, radius):
     # 1. Construire les coordonnées des pixels de la boîte.
     #    Vous pouvez utiliser np.ogrid.
     
-    rr, cc = [i for i in range(r0,r1+1)],[j for j in range(c0,c1+1)]
-
-    # 2. Construire un masque booléen correspondant aux pixels
-    #    situés dans le disque :
-    #
-    # (ligne - y)^2 + (colonne - x)^2 <= radius^2
-    
-   
-    mask = [[float((r0 + i - y)**2 + (c0 + j - x)**2) <= radius**2 for j in range(len(cc))] for i in range(len(rr))]
-    
-    # 3. Mettre les pixels correspondants à 1.
-    #
-    for r in rr:
-        for c in cc:
-            if mask[r-r0][c-c0]:
-                bitmap[r,c] = 1
+    rr, cc = np.ogrid[r0:r1, c0:c1]
+    mask = (rr - y)**2 + (cc - x)**2 <= radius**2
+    arr[r0:r1, c0:c1][mask] = 1
     return bitmap
 
 
@@ -110,7 +97,6 @@ def paint_segment(bitmap, p0, p1, radius):
     # 3. Déterminer le nombre de points intermédiaires en utilisant ceil.
     #
     n = max(2, int(np.ceil(distance/step)+1))
-    print(n)
 
     # 4. Construire les coordonnées interpolées avec np.linspace.
     #
@@ -297,7 +283,7 @@ def image_converter(strokes, size=28, margin=2, radius=1.0):
         # Sinon on crée un petit disque autour de (x,y)
         elif len(points) == 1:
             # petit disque
-            paint_disk(bitmap, points[0], radius)
+            paint_disk(bitmap, points[0][0],points[0][1],radius)
          
     return np.uint8(np.clip(bitmap, 0.0, 1.0) * 255)
 
